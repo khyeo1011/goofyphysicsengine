@@ -36,8 +36,6 @@ add_executable(${PROJECT_NAME}2d
   ${MAIN_SOURCE_DIR2D}/main.cpp
   ${GLAD_GL})
 
-add_executable(heightmap
-  src/demo/heightmap.cpp
-  ${GLAD_GL})
+
 
 target_include_directories(${PROJECT_NAME}2d PRIVATE src)

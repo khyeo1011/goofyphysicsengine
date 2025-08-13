@@ -1,7 +1,5 @@
 # goofyphysicsengine
-*Here is a simple README for your project:
 
----
 
 # Goofy Physics Engine
 
