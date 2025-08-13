@@ -7,6 +7,12 @@
 #include <sstream>
 #include <fstream>
 #include <cerrno>
+#include <queue>
+#include <math.h>
+
+
+
+
 /*
  * Utility header for OpenGL and GLFW rendering.
  *
@@ -18,12 +24,35 @@
  * - VAO class: Manages Vertex Array Objects for vertex attribute configuration.
  */
 
+#define NUMBER_COLUMNS_VBO 6
+#define NUMBER_VERTICES_TRIANGLE 3
+typedef std::pair<GLfloat, GLfloat> point;
+
+
 /**
  * @brief Loads the entire contents of a file into a std::string.
  * @param filename Path to the file to be loaded.
  * @return Contents of the file as a string.
  */
 std::string get_file_contents(const char *filename);
+
+
+
+
+struct RGBAColor{
+  GLfloat r;
+  GLfloat g;
+  GLfloat b;
+  GLfloat a;
+  RGBAColor(GLfloat r = 1,GLfloat g = 1, GLfloat b = 1, GLfloat a = 1){
+    this->r = r;
+    this->g = g;
+    this->b = b;
+    this->a = a;
+  }
+};
+
+
 
 /**
  * @class Shader
@@ -129,7 +158,7 @@ public:
    * @param VBO Reference to the VBO to link.
    * @param layout Attribute layout index.
    */
-  void LinkVBO(VBO &VBO, GLuint layout);
+  void LinkAttrib(VBO& VBO, GLuint layout = 0, GLuint numComponents = 3, GLenum type = GL_FLOAT, GLsizeiptr stride = 6*sizeof(GLfloat), void* offset = nullptr);
 
   /**
    * @brief Binds the VAO for use.
@@ -191,42 +220,52 @@ public:
 struct bufferObjects
 {
   VAO *vao;
-  VBO vbo;
-  EBO ebo;
+  VBO *vbo;
+  EBO *ebo;
+  unsigned int vertex_index = 0;
   bufferObjects(VAO &va, VBO &v, EBO &e, bool x)
   {
     vao = &va;
     vao->Bind();
-    vbo = v;
-    vao->LinkVBO(vbo, 0);
-    ebo = e;
+    vbo = &v;
+    vao->LinkAttrib(*vbo, 0);
+    vao->LinkAttrib(*vbo, 1, 3, GL_FLOAT, 6 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+    ebo = &e;
   };
 
-  bufferObjects(VAO &va, GLuint sizev = 8196, GLuint sizee = 2048)
+  bufferObjects(VAO &va, GLuint sizev = 2048, GLuint sizee = 2048)
   {
     vao = &va;
     vao->Bind();
-    vbo = VBO(2048);
-    vao->LinkVBO(vbo, 0);
-    ebo = EBO(2048);
+    vbo = new VBO(sizev);
+    vao->LinkAttrib(*vbo, 0);
+    vao->LinkAttrib(*vbo, 1, 3, GL_FLOAT, 6 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+    ebo = new EBO(sizee);
   }
 
   void addVertices(GLfloat *val, GLsizeiptr size)
   {
-    glNamedBufferSubData(vbo.ID, *vbo.curr * sizeof(GLfloat), size * sizeof(GLfloat), val);
-    *vbo.curr += size;
+    vbo->Bind();
+    glNamedBufferSubData(vbo->ID, *vbo->curr * sizeof(GLfloat), size * sizeof(GLfloat), val);
+    *vbo->curr += size;
   }
   void addIndices(GLuint *val, GLsizeiptr size)
   {
-    glNamedBufferSubData(ebo.ID, *ebo.curr * sizeof(GLuint), size * sizeof(GLuint), val);
-    *ebo.curr += size;
+    ebo->Bind();
+    glNamedBufferSubData(ebo->ID, *ebo->curr * sizeof(GLuint), size * sizeof(GLuint), val);
+    *ebo->curr += size;
   }
 };
+
+
 
 /**
  * Unbinds buffers and then draws the vertices and triangles based on the VBO
  * and EBO declarations, and then flushed the buffers to be reused.
  */
 void flushBuffer(bufferObjects *buffers);
+
+void rotatePoint(point &p, GLfloat theta);
+
 
 #endif

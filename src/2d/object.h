@@ -1,18 +1,20 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 #include "util/util.h"
-#include <math.h>
-typedef std::pair<GLfloat, GLfloat> point;
 
 class Object
 {
 public:
   virtual ~Object() = default;
-  //Update coordinates of the object
-  virtual void update(GLfloat deltaTime) = 0;
-  
-  //Add the vertices of the objects into the VBO
-  virtual void draw(bufferObjects* buffers) = 0;
+  void update(GLfloat deltatime)
+  {
+    center.first += dx * deltatime;
+    center.second += dx * deltatime;
+    theta = fmod((theta + dtheta * deltatime), 360);
+  }
+
+  // Add the vertices of the objects into the VBO
+  virtual void draw(bufferObjects *buffers) = 0;
 
 protected:
   point center;
@@ -20,6 +22,7 @@ protected:
   GLfloat theta;
   GLfloat dx;
   GLfloat dy;
+  RGBAColor color;
 };
 
 #endif
