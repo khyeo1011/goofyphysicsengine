@@ -27,7 +27,10 @@
 #define NUMBER_COLUMNS_VBO 6
 #define NUMBER_VERTICES_TRIANGLE 3
 typedef std::pair<GLfloat, GLfloat> point;
-
+static int screenWidth;
+static int screenHeight;
+static float widthScale;
+static float heightScale;
 
 /**
  * @brief Loads the entire contents of a file into a std::string.
@@ -79,6 +82,8 @@ public:
    * @brief Deletes the shader program from OpenGL.
    */
   void Delete();
+
+  void compileErrors(unsigned int shader, const char* type);
 };
 
 /**

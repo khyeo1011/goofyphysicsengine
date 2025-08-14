@@ -1,8 +1,8 @@
 #ifndef QUADRILATERAL_H
 #define QUADRILATERAL_H
 #include "object.h"
-const static int NUM_VERTIX_RECT = 4;
-const static int NUM_TRIANGLE_RECT = 2;
+#define NUM_VERTIX_RECT   4
+#define NUM_TRIANGLE_RECT 2
 
 class Rectangle : public Object
 {
@@ -20,15 +20,22 @@ public:
     this->color.r = color.g;
     this->color.r = color.b;
     this->color.r = color.a;
+    updateVertices();
   };
 
 
   
   //Add the vertices of the objects into the VBO
   void draw(bufferObjects* buffers) override;
+
+
+  void update(GLfloat deltatime) override;
+
+  void updateVertices();
 private:
   GLfloat length;
   GLfloat width;
+  point vertices[4];
 };
 
 #endif

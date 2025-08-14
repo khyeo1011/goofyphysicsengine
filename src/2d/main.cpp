@@ -8,15 +8,22 @@ static double frame_limit = 1.0 / 60;
 
 int main()
 {
-  glfwInit();
   target_fps = 60;
-  frame_limit = 1.0 / target_fps;
+  frame_limit = 0.99 / target_fps;
+  screenHeight = 900;
+  screenWidth = 1600;
+  heightScale = 2.0 / screenHeight;
+  widthScale = 2.0 / screenWidth;
+  Object::defineLimits(screenWidth, screenHeight);
+  Object::elasticity = 0.9;
+
+  glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-  GLFWwindow *window = glfwCreateWindow(800, 800, "Goofy Physics Engine 2d", NULL, NULL);
+  GLFWwindow *window = glfwCreateWindow(screenWidth, screenHeight, "Goofy Physics Engine 2d", NULL, NULL);
   if (window == NULL)
   {
     std::cout << "Failed to create GLFW window" << std::endl;
@@ -26,8 +33,8 @@ int main()
   glfwMakeContextCurrent(window);
 
   gladLoadGL(glfwGetProcAddress);
-  glViewport(0, 0, 800, 800);
-
+  glViewport(0, 0, screenWidth, screenHeight);
+  
   Shader shaderProgram("shaders/default.vert", "shaders/default.frag");
 
   VAO VAO1;
@@ -35,8 +42,11 @@ int main()
   bufferObjects *polygons = new bufferObjects(VAO1, 2048, 2048);
   VAO1.Unbind();
 
-  Rectangle rect0({0.0, 0.0}, 0.25, 0.25);
-  Rectangle rect1({0.5, 0.5}, 0.2, 0.4, {1, 1, 1, 1}, 45, 0, 0, 1);
+  Rectangle rect0({0.0, 0.0}, 100,100);
+  Rectangle rect1({200, 10}, 100, 100, {1, 1, 1, 1}, 0, 1000, 1000, M_PI/4);
+  
+  GLuint scaleXID = glGetUniformLocation(shaderProgram.ID, "scaleX");
+  GLuint scaleYID = glGetUniformLocation(shaderProgram.ID, "scaleY");
   /* // For Debugging
     VAO1.Bind();
     rect0.draw(polygons);
@@ -81,12 +91,15 @@ int main()
       std::string FPS = std::to_string(1 / accumulated_time);
       std::string ms = std::to_string((dt) * 1000);
       std::string newTitle = "YoutubeOpenGL - " + FPS + "FPS / " + ms + "ms";
+      rect0.update(update_dt);
       rect1.update(update_dt);
       glfwSetWindowTitle(window, newTitle.c_str());
       accumulated_time = 0.0;
       glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
       shaderProgram.Activate();
+      glUniform1f(scaleXID, widthScale);
+      glUniform1f(scaleYID, heightScale);
       VAO1.Bind();
       rect0.draw(polygons);
       rect1.draw(polygons);

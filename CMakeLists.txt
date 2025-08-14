@@ -31,6 +31,7 @@ add_executable(${PROJECT_NAME}2d
   ${UTIL_DIR}/util.h
   ${UTIL_DIR}/util.cpp
   ${MAIN_SOURCE_DIR2D}/object.h
+  ${MAIN_SOURCE_DIR2D}/object.cpp
   ${MAIN_SOURCE_DIR2D}/rectangle.h
   ${MAIN_SOURCE_DIR2D}/rectangle.cpp
   ${MAIN_SOURCE_DIR2D}/main.cpp
