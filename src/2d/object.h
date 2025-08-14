@@ -30,10 +30,7 @@ protected:
   GLfloat theta;
   GLfloat dx;
   GLfloat dy;
-  RGBAColor color;
+  RGBAColor *color;
 };
-
-
-
 
 #endif

@@ -15,7 +15,7 @@ int main()
   heightScale = 2.0 / screenHeight;
   widthScale = 2.0 / screenWidth;
   Object::defineLimits(screenWidth, screenHeight);
-  Object::elasticity = 0.9;
+  Object::elasticity = 1;
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -34,7 +34,7 @@ int main()
 
   gladLoadGL(glfwGetProcAddress);
   glViewport(0, 0, screenWidth, screenHeight);
-  
+
   Shader shaderProgram("shaders/default.vert", "shaders/default.frag");
 
   VAO VAO1;
@@ -42,9 +42,29 @@ int main()
   bufferObjects *polygons = new bufferObjects(VAO1, 2048, 2048);
   VAO1.Unbind();
 
-  Rectangle rect0({0.0, 0.0}, 100,100);
-  Rectangle rect1({200, 10}, 100, 100, {1, 1, 1, 1}, 0, 1000, 1000, M_PI/4);
-  
+  // Create multiple rectangles
+  std::vector<Rectangle> rectangles;
+  int numRects = 10000;
+  srand((unsigned int)time(NULL));
+  for (int i = 0; i < numRects; ++i)
+  {
+    GLfloat x = (rand() % (screenWidth - 200)) - (screenWidth / 2 - 100);
+    GLfloat y = (rand() % (screenHeight - 200)) - (screenHeight / 2 - 100);
+    GLfloat len = 50; // 50 to 150
+    GLfloat wid = 50; // 50 to 150
+    RGBAColor* color = new RGBAColor(
+        (rand() % 1001) / 1000.0f,
+        (rand() % 1001) / 1000.0f,
+        (rand() % 1001) / 1000.0f,
+        1.0f);
+    std::cout << "[DEBUG] Rectangle color: R=" << color->r << ", G=" << color->g << ", B=" << color->b << ", A=" << color->a << std::endl;
+    GLfloat angle = ((rand() % 360) / 180.0f) * M_PI;
+    GLfloat dx = (rand() % 401) - 200;                          // -200 to 200
+    GLfloat dy = (rand() % 401) - 200;                          // -200 to 200
+    GLfloat dtheta = ((rand() % 1001) / 1000.0f) * M_PI / 4.0f; // 0 to pi/4
+    rectangles.emplace_back(point{x, y}, len, wid, color, angle, dx, dy, dtheta);
+  }
+
   GLuint scaleXID = glGetUniformLocation(shaderProgram.ID, "scaleX");
   GLuint scaleYID = glGetUniformLocation(shaderProgram.ID, "scaleY");
   /* // For Debugging
@@ -91,8 +111,10 @@ int main()
       std::string FPS = std::to_string(1 / accumulated_time);
       std::string ms = std::to_string((dt) * 1000);
       std::string newTitle = "YoutubeOpenGL - " + FPS + "FPS / " + ms + "ms";
-      rect0.update(update_dt);
-      rect1.update(update_dt);
+      for (auto &rect : rectangles)
+      {
+        rect.update(update_dt);
+      }
       glfwSetWindowTitle(window, newTitle.c_str());
       accumulated_time = 0.0;
       glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
@@ -101,8 +123,10 @@ int main()
       glUniform1f(scaleXID, widthScale);
       glUniform1f(scaleYID, heightScale);
       VAO1.Bind();
-      rect0.draw(polygons);
-      rect1.draw(polygons);
+      for (auto &rect : rectangles)
+      {
+        rect.draw(polygons);
+      }
       glDrawElements(GL_TRIANGLES, *polygons->ebo->curr, GL_UNSIGNED_INT, 0);
       glfwSwapBuffers(window);
       flushBuffer(polygons);

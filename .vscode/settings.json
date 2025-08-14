@@ -67,6 +67,8 @@
     "numbers": "cpp",
     "span": "cpp",
     "cinttypes": "cpp",
-    "variant": "cpp"
+    "variant": "cpp",
+    "queue": "cpp",
+    "text_encoding": "cpp"
   }
 }

@@ -21,14 +21,15 @@ void Rectangle::draw(bufferObjects *buffers)
   GLuint i[NUMBER_VERTICES_TRIANGLE * NUM_TRIANGLE_RECT];
   GLfloat p[NUMBER_COLUMNS_VBO * NUM_VERTIX_RECT];
 
+  // std::cout << "[DEBUG] Rectangle color: R=" << color.r << ", G=" << color.g << ", B=" << color.b << ", A=" << color.a << std::endl;
   for (int j = 0; j < 4; j++)
   {
     p[j * NUMBER_COLUMNS_VBO] = vertices[j].first;
     p[j * NUMBER_COLUMNS_VBO + 1] = vertices[j].second;
     p[j * NUMBER_COLUMNS_VBO + 2] = 0.0;
-    p[j * NUMBER_COLUMNS_VBO + 3] = color.r;
-    p[j * NUMBER_COLUMNS_VBO + 4] = color.g;
-    p[j * NUMBER_COLUMNS_VBO + 5] = color.b;
+    p[j * NUMBER_COLUMNS_VBO + 3] = color->r;
+    p[j * NUMBER_COLUMNS_VBO + 4] = color->g;
+    p[j * NUMBER_COLUMNS_VBO + 5] = color->b;
   }
   // Indices for the triangles
 
