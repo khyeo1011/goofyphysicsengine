@@ -1,5 +1,5 @@
-#ifndef QUADRILATERAL_H
-#define QUADRILATERAL_H
+#ifndef RECTANGLE_H
+#define RECTANGLE_H
 #include "object.h"
 #define NUM_VERTIX_RECT 4
 #define NUM_TRIANGLE_RECT 2
@@ -33,7 +33,7 @@ public:
 
   // Add the vertices of the objects into the VBO
   void draw(bufferObjects *buffers) override;
-
+  point getCenter() const { return center; }
   void update(GLfloat deltatime) override;
   bool isCollidingWith(const Object *other) const override;
   bool isCollidingWithRectangle(const Rectangle *rect) const override;

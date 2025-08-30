@@ -3,6 +3,7 @@
 #include "util/util.h"
 #include "object.h"
 #include "rectangle.h"
+#include "2dsimulator.h"
 static unsigned int target_fps = 60;
 static double frame_limit = 1.0 / 60;
 
@@ -39,30 +40,30 @@ int main()
 
   VAO VAO1;
 
-  bufferObjects *polygons = new bufferObjects(VAO1, 2048, 2048);
+  bufferObjects *polygons = new bufferObjects(VAO1, 204800, 204800);
   VAO1.Unbind();
 
   // Create multiple rectangles
-  std::vector<Object*> rectangles;
-  int numRects = 2;
+
+  int numRects = 100;
+  Simulator2D sim;
   srand((unsigned int)time(NULL));
   for (int i = 0; i < numRects; ++i)
   {
     GLfloat x = (rand() % (screenWidth - 200)) - (screenWidth / 2 - 100);
     GLfloat y = (rand() % (screenHeight - 200)) - (screenHeight / 2 - 100);
-    GLfloat len = 200; // 50 to 150
-    GLfloat wid = 200; // 50 to 150
+    GLfloat len = 20;
+    GLfloat wid = 20;
     RGBAColor *color = new RGBAColor(
-        (rand() % 1001) / 1000.0f,
-        (rand() % 1001) / 1000.0f,
-        (rand() % 1001) / 1000.0f,
+        (rand() % 501) / 1000.0f + 0.5,
+        (rand() % 501) / 1000.0f + 0.5,
+        (rand() % 501) / 1000.0f + 0.5,
         1.0f);
-    std::cout << "[DEBUG] Rectangle color: R=" << color->r << ", G=" << color->g << ", B=" << color->b << ", A=" << color->a << std::endl;
     GLfloat angle = ((rand() % 360) / 180.0f) * M_PI;
-    GLfloat dx = (rand() % 401) - 200;                          // -200 to 200
-    GLfloat dy = (rand() % 401) - 200;                          // -200 to 200
-    GLfloat dtheta = ((rand() % 1001) / 1000.0f) * M_PI / 4.0f; // 0 to pi/4
-    rectangles.push_back(new Rectangle({x, y}, len, wid, color, angle, dx, dy, dtheta));
+    GLfloat dx = (rand() % 401) - 200;
+    GLfloat dy = (rand() % 200) - 100;
+    GLfloat dtheta = ((rand() % 1001) / 1000.0f) * M_PI / 4.0f;
+    sim.objects.push_back(new Rectangle({x, y}, len, wid, color, angle, dx, dy, dtheta));
   }
 
   GLuint scaleXID = glGetUniformLocation(shaderProgram.ID, "scaleX");
@@ -111,20 +112,7 @@ int main()
       std::string FPS = std::to_string(1 / accumulated_time);
       std::string ms = std::to_string((dt) * 1000);
       std::string newTitle = "YoutubeOpenGL - " + FPS + "FPS / " + ms + "ms";
-      for (auto &rect : rectangles)
-      {
-        rect->update(update_dt);
-      }
-      for (size_t i = 0; i < rectangles.size(); ++i)
-      {
-        for (size_t j = i + 1; j < rectangles.size(); ++j)
-        {
-          if (rectangles[i]->isCollidingWith(rectangles[j]))
-          {
-            std::cout << "colliding" << std::endl;
-          }
-        }
-      }
+      sim.update(update_dt);
       glfwSetWindowTitle(window, newTitle.c_str());
       accumulated_time = 0.0;
       glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
@@ -133,10 +121,7 @@ int main()
       glUniform1f(scaleXID, widthScale);
       glUniform1f(scaleYID, heightScale);
       VAO1.Bind();
-      for (auto &rect : rectangles)
-      {
-        rect->draw(polygons);
-      }
+      sim.drawAll(polygons);
       glDrawElements(GL_TRIANGLES, *polygons->ebo->curr, GL_UNSIGNED_INT, 0);
       glfwSwapBuffers(window);
       flushBuffer(polygons);

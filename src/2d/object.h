@@ -19,6 +19,10 @@ public:
   virtual bool isCollidingWith(const Object *other) const = 0;
   virtual bool isCollidingWithRectangle(const class Rectangle *rect) const = 0;
 
+  void applyGravity(float gravity){
+    dy -= gravity;
+  }
+
   static void defineLimits(int screenWidth, int screenHeight)
   {
     leftLimit = -(float)screenWidth / 2.0;
@@ -32,25 +36,24 @@ public:
   // virtual void applyTorque(GLfloat torque);
 
   // virtual bool isInObject(point coordinate);
-
-
-protected:
   // Center of the object
   point center;
   // Angular Velocity
-  GLfloat dtheta;
+  float dtheta;
   // Angle of the object
-  GLfloat theta;
+  float theta;
   // Velocity of object x-axis
-  GLfloat dx;
+  float dx;
   // Velocity of object y-axis
-  GLfloat dy;
+  float dy;
   // Color of the object
   RGBAColor *color;
   // Mass of obect
-  GLfloat mass;
+  float mass;
   // Ratio of the force applied that goes to torque. 0 means none, 1 means all.
-  GLfloat torqueElasticity;
+  float torqueElasticity;
+
+protected:
 };
 
 #endif

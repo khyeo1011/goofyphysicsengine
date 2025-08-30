@@ -35,6 +35,8 @@ add_executable(${PROJECT_NAME}2d
   ${MAIN_SOURCE_DIR2D}/rectangle.h
   ${MAIN_SOURCE_DIR2D}/rectangle.cpp
   ${MAIN_SOURCE_DIR2D}/main.cpp
+  ${MAIN_SOURCE_DIR2D}/2dsimulator.h
+  ${MAIN_SOURCE_DIR2D}/2dsimulator.cpp
   ${GLAD_GL})
 
 
