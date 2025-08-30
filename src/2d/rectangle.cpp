@@ -1,5 +1,73 @@
 #include "rectangle.h"
+// Helper: Project vertices onto axis
+static void projectOntoAxis(const std::vector<point> &verts, const point &axis, float &min, float &max)
+{
+  min = max = (verts[0].first * axis.first + verts[0].second * axis.second);
+  for (const auto &v : verts)
+  {
+    float proj = v.first * axis.first + v.second * axis.second;
+    if (proj < min)
+      min = proj;
+    if (proj > max)
+      max = proj;
+  }
+}
 
+// Helper: Get rectangle axes (normals)
+static std::vector<point> getAxes(const std::vector<point> &verts)
+{
+  std::vector<point> axes;
+  for (int i = 0; i < 4; ++i)
+  {
+    int next = (i + 1) % 4;
+    float dx = verts[next].first - verts[i].first;
+    float dy = verts[next].second - verts[i].second;
+    // Normal (perpendicular)
+    point axis = {-dy, dx};
+    float len = std::sqrt(axis.first * axis.first + axis.second * axis.second);
+    axis.first /= len;
+    axis.second /= len;
+    axes.push_back(axis);
+  }
+  return axes;
+}
+
+bool Rectangle::isCollidingWithRectangle(const Rectangle *rect) const
+{
+  // SAT for two rectangles
+  std::vector<point> vertsA(this->vertices, this->vertices + 4);
+  std::vector<point> vertsB(rect->vertices, rect->vertices + 4);
+  auto axesA = getAxes(vertsA);
+  auto axesB = getAxes(vertsB);
+
+  for (const auto &axis : axesA)
+  {
+    float minA, maxA, minB, maxB;
+    projectOntoAxis(vertsA, axis, minA, maxA);
+    projectOntoAxis(vertsB, axis, minB, maxB);
+    if (maxA < minB || maxB < minA)
+      return false;
+  }
+  for (const auto &axis : axesB)
+  {
+    float minA, maxA, minB, maxB;
+    projectOntoAxis(vertsA, axis, minA, maxA);
+    projectOntoAxis(vertsB, axis, minB, maxB);
+    if (maxA < minB || maxB < minA)
+      return false;
+  }
+  return true;
+}
+
+bool Rectangle::isCollidingWith(const Object *other) const
+{
+  return other->isCollidingWithRectangle(this);
+}
+
+// bool Rectangle::isCollidingWithCircle(const Circle* circ) const {
+//     // TODO: Implement SAT or use closest point approach
+//     return false;
+// }
 void Rectangle::updateVertices()
 {
   vertices[0] = {(-length / 2), (width / 2)};  // top-left

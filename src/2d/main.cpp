@@ -43,16 +43,16 @@ int main()
   VAO1.Unbind();
 
   // Create multiple rectangles
-  std::vector<Rectangle> rectangles;
-  int numRects = 10000;
+  std::vector<Object*> rectangles;
+  int numRects = 2;
   srand((unsigned int)time(NULL));
   for (int i = 0; i < numRects; ++i)
   {
     GLfloat x = (rand() % (screenWidth - 200)) - (screenWidth / 2 - 100);
     GLfloat y = (rand() % (screenHeight - 200)) - (screenHeight / 2 - 100);
-    GLfloat len = 50; // 50 to 150
-    GLfloat wid = 50; // 50 to 150
-    RGBAColor* color = new RGBAColor(
+    GLfloat len = 200; // 50 to 150
+    GLfloat wid = 200; // 50 to 150
+    RGBAColor *color = new RGBAColor(
         (rand() % 1001) / 1000.0f,
         (rand() % 1001) / 1000.0f,
         (rand() % 1001) / 1000.0f,
@@ -62,7 +62,7 @@ int main()
     GLfloat dx = (rand() % 401) - 200;                          // -200 to 200
     GLfloat dy = (rand() % 401) - 200;                          // -200 to 200
     GLfloat dtheta = ((rand() % 1001) / 1000.0f) * M_PI / 4.0f; // 0 to pi/4
-    rectangles.emplace_back(point{x, y}, len, wid, color, angle, dx, dy, dtheta);
+    rectangles.push_back(new Rectangle({x, y}, len, wid, color, angle, dx, dy, dtheta));
   }
 
   GLuint scaleXID = glGetUniformLocation(shaderProgram.ID, "scaleX");
@@ -113,7 +113,17 @@ int main()
       std::string newTitle = "YoutubeOpenGL - " + FPS + "FPS / " + ms + "ms";
       for (auto &rect : rectangles)
       {
-        rect.update(update_dt);
+        rect->update(update_dt);
+      }
+      for (size_t i = 0; i < rectangles.size(); ++i)
+      {
+        for (size_t j = i + 1; j < rectangles.size(); ++j)
+        {
+          if (rectangles[i]->isCollidingWith(rectangles[j]))
+          {
+            std::cout << "colliding" << std::endl;
+          }
+        }
       }
       glfwSetWindowTitle(window, newTitle.c_str());
       accumulated_time = 0.0;
@@ -125,7 +135,7 @@ int main()
       VAO1.Bind();
       for (auto &rect : rectangles)
       {
-        rect.draw(polygons);
+        rect->draw(polygons);
       }
       glDrawElements(GL_TRIANGLES, *polygons->ebo->curr, GL_UNSIGNED_INT, 0);
       glfwSwapBuffers(window);
