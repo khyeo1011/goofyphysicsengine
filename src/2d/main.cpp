@@ -16,7 +16,7 @@ int main()
   heightScale = 2.0 / screenHeight;
   widthScale = 2.0 / screenWidth;
   Object::defineLimits(screenWidth, screenHeight);
-  Object::elasticity = 1;
+  Object::elasticity = 0.99;
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -45,25 +45,26 @@ int main()
 
   // Create multiple rectangles
 
-  int numRects = 100;
+  int numRects = 20;
   Simulator2D sim;
   srand((unsigned int)time(NULL));
   for (int i = 0; i < numRects; ++i)
   {
     GLfloat x = (rand() % (screenWidth - 200)) - (screenWidth / 2 - 100);
     GLfloat y = (rand() % (screenHeight - 200)) - (screenHeight / 2 - 100);
-    GLfloat len = 20;
-    GLfloat wid = 20;
+    GLfloat len = 10;
+    GLfloat wid = 100;
     RGBAColor *color = new RGBAColor(
         (rand() % 501) / 1000.0f + 0.5,
         (rand() % 501) / 1000.0f + 0.5,
         (rand() % 501) / 1000.0f + 0.5,
         1.0f);
     GLfloat angle = ((rand() % 360) / 180.0f) * M_PI;
-    GLfloat dx = (rand() % 401) - 200;
-    GLfloat dy = (rand() % 200) - 100;
+    GLfloat dx = (rand() % 2) - 1;
+    GLfloat dy = (rand() % 100) - 1;
     GLfloat dtheta = ((rand() % 1001) / 1000.0f) * M_PI / 4.0f;
     sim.objects.push_back(new Rectangle({x, y}, len, wid, color, angle, dx, dy, dtheta));
+    sim.objects[i]->mass = (rand() % 1000);
   }
 
   GLuint scaleXID = glGetUniformLocation(shaderProgram.ID, "scaleX");
@@ -111,7 +112,7 @@ int main()
       last_update_time = current_time;
       std::string FPS = std::to_string(1 / accumulated_time);
       std::string ms = std::to_string((dt) * 1000);
-      std::string newTitle = "YoutubeOpenGL - " + FPS + "FPS / " + ms + "ms";
+      std::string newTitle = "Goofy Physics Engine 2d - " + FPS + "FPS / " + ms + "ms";
       sim.update(update_dt);
       glfwSetWindowTitle(window, newTitle.c_str());
       accumulated_time = 0.0;

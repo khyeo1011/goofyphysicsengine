@@ -39,6 +39,40 @@ public:
   bool isCollidingWithRectangle(const Rectangle *rect) const override;
   void updateVertices();
 
+  float getMomentOfInertia() const
+  {
+    return (1.0f / 12.0f) * mass * (length * length + width * width);
+  }
+
+  float getMinX() const
+  {
+    float minX = vertices[0].first;
+    for (int i = 1; i < 4; ++i)
+      minX = std::min(minX, vertices[i].first);
+    return minX;
+  }
+  float getMaxX() const
+  {
+    float maxX = vertices[0].first;
+    for (int i = 1; i < 4; ++i)
+      maxX = std::max(maxX, vertices[i].first);
+    return maxX;
+  }
+  float getMinY() const
+  {
+    float minY = vertices[0].second;
+    for (int i = 1; i < 4; ++i)
+      minY = std::min(minY, vertices[i].second);
+    return minY;
+  }
+  float getMaxY() const
+  {
+    float maxY = vertices[0].second;
+    for (int i = 1; i < 4; ++i)
+      maxY = std::max(maxY, vertices[i].second);
+    return maxY;
+  }
+
 private:
   GLfloat length;
   GLfloat width;

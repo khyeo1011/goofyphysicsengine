@@ -49,9 +49,9 @@ public:
   // Color of the object
   RGBAColor *color;
   // Mass of obect
-  float mass;
-  // Ratio of the force applied that goes to torque. 0 means none, 1 means all.
-  float torqueElasticity;
+  float mass = 10;
+  // Ratio of the force applied that goes to torque
+  float torqueElasticity = 1;
 
 protected:
 };
