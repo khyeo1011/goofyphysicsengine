@@ -18,6 +18,8 @@ public:
 
   virtual bool isCollidingWith(const Object *other) const = 0;
   virtual bool isCollidingWithRectangle(const class Rectangle *rect) const = 0;
+  virtual bool isCollidingWithCircle(const class Circle *circ) const = 0;
+  virtual bool isCollidingWithTriangle(const class Triangle *tri) const = 0;
 
   void applyGravity(float gravity){
     dy -= gravity;

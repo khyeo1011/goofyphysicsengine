@@ -1,23 +1,13 @@
 #include "2dsimulator.h"
 #include "object.h"
 #include "rectangle.h"
+#include "circle.h"
+#include "triangle.h"
+#include "collision.h"
 #include <iostream>
 #include <cmath>
 #include <unordered_map>
 #include <utility>
-namespace
-{
-  // Helper for collision response
-  point computeCollisionNormal(const Rectangle *rectA, const Rectangle *rectB)
-  {
-    float dx = rectB->getCenter().first - rectA->getCenter().first;
-    float dy = rectB->getCenter().second - rectA->getCenter().second;
-    float len = std::sqrt(dx * dx + dy * dy);
-    if (len == 0)
-      return {1, 0};
-    return {dx / len, dy / len};
-  }
-}
 
 void Simulator2D::update(double dt)
 {
@@ -39,21 +29,26 @@ struct CellHash
 
 void Simulator2D::handleCollisions()
 {
-  float cellSize = 100.5f; // Adjust based on your largest object
+  float cellSize = 200.0f; // Adjust based on your largest object
   std::unordered_map<std::pair<int, int>, std::vector<Object *>, CellHash> grid;
 
   // Place objects in grid cells
   for (auto *obj : objects)
   {
-    auto *rect = dynamic_cast<Rectangle *>(obj);
-    if (!rect)
-      continue;
-
-    // Compute bounding box
-    float minX = rect->getMinX();
-    float maxX = rect->getMaxX();
-    float minY = rect->getMinY();
-    float maxY = rect->getMaxY();
+    float minX, maxX, minY, maxY;
+    if (auto *rect = dynamic_cast<Rectangle *>(obj)) {
+        minX = rect->getMinX();
+        maxX = rect->getMaxX();
+        minY = rect->getMinY();
+        maxY = rect->getMaxY();
+    } else if (auto *circ = dynamic_cast<Circle *>(obj)) {
+        minX = circ->center.first - circ->getRadius();
+        maxX = circ->center.first + circ->getRadius();
+        minY = circ->center.second - circ->getRadius();
+        maxY = circ->center.second + circ->getRadius();
+    } else {
+        continue;
+    }
 
     int cellMinX = static_cast<int>(std::floor(minX / cellSize));
     int cellMaxX = static_cast<int>(std::floor(maxX / cellSize));
@@ -93,47 +88,7 @@ void Simulator2D::handleCollisions()
             {
               if (cellObjs[i]->isCollidingWith(neighborObjs[j]))
               {
-                // --- Your collision response here (as before) ---
-                Rectangle *rectA = dynamic_cast<Rectangle *>(cellObjs[i]);
-                Rectangle *rectB = dynamic_cast<Rectangle *>(neighborObjs[j]);
-                if (!rectA || !rectB)
-                  continue;
-
-                point normal = computeCollisionNormal(rectA, rectB);
-
-                float relVelX = rectB->dx - rectA->dx;
-                float relVelY = rectB->dy - rectA->dy;
-                float relVelAlongNormal = relVelX * normal.first + relVelY * normal.second;
-                if (relVelAlongNormal > 0)
-                  continue;
-
-                float mA = rectA->mass;
-                float mB = rectB->mass;
-                float e = Object::elasticity;
-
-                float impulse = -(1 + e) * relVelAlongNormal / (1.0f / mA + 1.0f / mB);
-                float impulseX = impulse * normal.first;
-                float impulseY = impulse * normal.second;
-
-                rectA->dx -= impulseX / mA;
-                rectA->dy -= impulseY / mA;
-                rectB->dx += impulseX / mB;
-                rectB->dy += impulseY / mB;
-
-                float contactX = (rectA->getCenter().first + rectB->getCenter().first) / 2.0f;
-                float contactY = (rectA->getCenter().second + rectB->getCenter().second) / 2.0f;
-                float rAx = contactX - rectA->getCenter().first;
-                float rAy = contactY - rectA->getCenter().second;
-                float rBx = contactX - rectB->getCenter().first;
-                float rBy = contactY - rectB->getCenter().second;
-                float torqueA = rAx * impulseY - rAy * impulseX;
-                float torqueB = rBx * (-impulseY) - rBy * (-impulseX);
-
-                float IA = rectA->getMomentOfInertia();
-                float IB = rectB->getMomentOfInertia();
-
-                rectA->dtheta += rectA->torqueElasticity * torqueA / IA;
-                rectB->dtheta += rectB->torqueElasticity * torqueB / IB;
+                Collision::handleCollision(cellObjs[i], neighborObjs[j]);
               }
             }
           }

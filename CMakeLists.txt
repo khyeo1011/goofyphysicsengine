@@ -27,17 +27,7 @@ include_directories(include)
 include_directories(deps)
 link_libraries(glfw)
 
-add_executable(${PROJECT_NAME}2d
-  ${UTIL_DIR}/util.h
-  ${UTIL_DIR}/util.cpp
-  ${MAIN_SOURCE_DIR2D}/object.h
-  ${MAIN_SOURCE_DIR2D}/object.cpp
-  ${MAIN_SOURCE_DIR2D}/rectangle.h
-  ${MAIN_SOURCE_DIR2D}/rectangle.cpp
-  ${MAIN_SOURCE_DIR2D}/main.cpp
-  ${MAIN_SOURCE_DIR2D}/2dsimulator.h
-  ${MAIN_SOURCE_DIR2D}/2dsimulator.cpp
-  ${GLAD_GL})
+add_executable(goofyphysicsengine2d src/2d/main.cpp src/2d/object.cpp src/2d/rectangle.cpp src/2d/2dsimulator.cpp src/2d/circle.cpp src/2d/triangle.cpp src/2d/collision.cpp src/util/util.cpp deps/getopt.c src/gl.c)
 
 
 

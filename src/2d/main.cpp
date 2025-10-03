@@ -3,7 +3,9 @@
 #include "util/util.h"
 #include "object.h"
 #include "rectangle.h"
+#include "circle.h"
 #include "2dsimulator.h"
+#include "triangle.h"
 static unsigned int target_fps = 60;
 static double frame_limit = 1.0 / 60;
 
@@ -16,7 +18,7 @@ int main()
   heightScale = 2.0 / screenHeight;
   widthScale = 2.0 / screenWidth;
   Object::defineLimits(screenWidth, screenHeight);
-  Object::elasticity = 0.99;
+  Object::elasticity = 1;
 
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -46,14 +48,15 @@ int main()
   // Create multiple rectangles
 
   int numRects = 20;
+  int numCircles = 10;
   Simulator2D sim;
   srand((unsigned int)time(NULL));
   for (int i = 0; i < numRects; ++i)
   {
     GLfloat x = (rand() % (screenWidth - 200)) - (screenWidth / 2 - 100);
     GLfloat y = (rand() % (screenHeight - 200)) - (screenHeight / 2 - 100);
-    GLfloat len = 10;
-    GLfloat wid = 100;
+    GLfloat width = 100;
+    GLfloat height = 10;
     RGBAColor *color = new RGBAColor(
         (rand() % 501) / 1000.0f + 0.5,
         (rand() % 501) / 1000.0f + 0.5,
@@ -63,8 +66,30 @@ int main()
     GLfloat dx = (rand() % 2) - 1;
     GLfloat dy = (rand() % 100) - 1;
     GLfloat dtheta = ((rand() % 1001) / 1000.0f) * M_PI / 4.0f;
-    sim.objects.push_back(new Rectangle({x, y}, len, wid, color, angle, dx, dy, dtheta));
+
+    point v1 = {x - width / 2, y + height / 2};
+    point v2 = {x + width / 2, y + height / 2};
+    point v3 = {x + width / 2, y - height / 2};
+    point v4 = {x - width / 2, y - height / 2};
+
+    sim.objects.push_back(new Rectangle(v1, v2, v3, v4, color, angle, dx, dy, dtheta));
     sim.objects[i]->mass = (rand() % 1000);
+    sim.objects[i]->torqueElasticity = 1;
+  }
+
+  for (int i = 0; i < numCircles; ++i) {
+    GLfloat x = (rand() % (screenWidth - 200)) - (screenWidth / 2 - 100);
+    GLfloat y = (rand() % (screenHeight - 200)) - (screenHeight / 2 - 100);
+    GLfloat radius = (rand() % 50) + 10;
+    RGBAColor *color = new RGBAColor(
+        (rand() % 501) / 1000.0f + 0.5,
+        (rand() % 501) / 1000.0f + 0.5,
+        (rand() % 501) / 1000.0f + 0.5,
+        1.0f);
+    GLfloat dx = (rand() % 200) - 100;
+    GLfloat dy = (rand() % 200) - 100;
+    sim.objects.push_back(new Circle({x, y}, radius, color, dx, dy));
+    sim.objects[numRects + i]->mass = (rand() % 1000);
   }
 
   GLuint scaleXID = glGetUniformLocation(shaderProgram.ID, "scaleX");
@@ -90,7 +115,8 @@ int main()
       std::cout << inptr[i] << " ";
       if ((i + 1) % 3 == 0)
         std::cout << std::endl;
-    } */
+    }
+  */
   double last_time = glfwGetTime();
   double last_update_time = glfwGetTime();
   double accumulated_time = 0.0;
